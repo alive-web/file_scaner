@@ -5,7 +5,7 @@ from datetime import datetime
 # from shutil import copyfile
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-p', '--path',  type=str, default="/tmp",  help='path to scan directory')
+parser.add_argument('-p', '--path',  type=str, required=True, help='path to scan directory')
 args = parser.parse_args()
 
 watched_dir = args.path
