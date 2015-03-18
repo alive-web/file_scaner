@@ -1,13 +1,17 @@
+import config
 from datetime import datetime
 from pymongo import MongoClient
 
+
 class DataBase():
-    client = MongoClient('localhost', 27017)
+    def __init__(self):
+        pass
+
+    client = MongoClient(config.DB_HOST, config.DB_PORT)
     db = client.file_scaner
     events = db.events
 
     def write_log(self, event):
-        print event
         action = {
             'date': datetime.now(),
             'event': event.maskname,
@@ -15,6 +19,6 @@ class DataBase():
         }
         self.events.insert(action)
 
-    def create_copy():
+    def put_file_revision(self):
         # This method will accept one argument "path to file" and will record reserve copy file in db
         pass
