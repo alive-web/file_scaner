@@ -19,7 +19,6 @@ class DataBase():
                 event.maskname) != "IN_IGNORED":
             this_file = open(event.pathname, 'rb')
             action.file.put(this_file)
-            print action.file.read()
         action.save()
 
     def put_file_revision(self, event):
