@@ -1,7 +1,8 @@
-from mongoengine import *
+from datetime import datetime
+from mongoengine import Document, fields
 
 
 class Events(Document):
-    date = DateTimeField()
-    event = StringField(max_length=30)
-    path_name = StringField(max_length=200)
+    date = fields.DateTimeField(default=datetime.now)
+    event = fields.StringField(max_length=30)
+    path_name = fields.StringField(max_length=200)

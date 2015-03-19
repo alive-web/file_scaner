@@ -1,7 +1,6 @@
 import config
-from mongoengine import *
 from models import Events
-from datetime import datetime
+from mongoengine import connect
 
 
 class DataBase():
@@ -15,10 +14,7 @@ class DataBase():
         )
 
     def write_log(self, event):
-        action = Events()
-        action.date = datetime.now()
-        action.event = event.maskname
-        action.path_name = event.pathname
+        action = Events(event=event.maskname, path_name=event.pathname)
         action.save()
 
     def put_file_revision(self):
