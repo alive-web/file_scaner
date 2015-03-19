@@ -15,8 +15,12 @@ class DataBase():
 
     def write_log(self, event):
         action = Events(event=event.maskname, path_name=event.pathname)
+        if str(event.maskname) != "IN_CREATE|IN_ISDIR" and str(event.maskname) != "IN_DELETE" and str(
+                event.maskname) != "IN_IGNORED":
+            this_file = open(event.pathname, 'rb')
+            action.file.put(this_file)
+            print action.file.read()
         action.save()
 
-    def put_file_revision(self):
-        # This method will accept one argument "path to file" and will record reserve copy file in db
+    def put_file_revision(self, event):
         pass

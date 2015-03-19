@@ -6,3 +6,4 @@ class Events(Document):
     date = fields.DateTimeField(default=datetime.now)
     event = fields.StringField(max_length=30)
     path_name = fields.StringField(max_length=200)
+    file = fields.FileField()
