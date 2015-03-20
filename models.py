@@ -6,4 +6,14 @@ class Events(Document):
     date = fields.DateTimeField(default=datetime.now)
     event = fields.StringField(max_length=30)
     path_name = fields.StringField(max_length=200)
-    file = fields.FileField()
+    src_path_name = fields.StringField(max_length=200)
+
+
+class FileSystem(Document):
+    path_name = fields.StringField(max_length=200)
+    parent = fields.StringField(max_length=200)
+    version = fields.IntField(default=1)
+    date = fields.DateTimeField(default=datetime.now)
+    body = fields.FileField()
+    is_dir = fields.BooleanField(default=False)
+    is_del = fields.BooleanField(default=False)

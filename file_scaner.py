@@ -9,7 +9,7 @@ args = parser.parse_args()
 watched_dir = args.path
 wm = pyinotify.WatchManager()
 database = DataBase()
-mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_ATTRIB | pyinotify.IN_CLOSE_WRITE
+mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_ATTRIB | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_MOVED_TO | pyinotify.IN_MOVED_FROM
 
 
 class EventHandler(pyinotify.ProcessEvent):
@@ -19,6 +19,7 @@ class EventHandler(pyinotify.ProcessEvent):
 
     def process_default(self, event):
         self.db.write_log(event)
+        self.db.put_file_revision(event)
 
 pyinotify.AsyncNotifier(wm, EventHandler(database))
 wm.add_watch(watched_dir, mask, rec=True)
