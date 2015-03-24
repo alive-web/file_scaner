@@ -10,8 +10,9 @@ class Events(Document):
 
 
 class FileSystem(Document):
-    path_name = fields.StringField(max_length=200)
-    parent = fields.StringField(max_length=200)
+    path_name = fields.StringField()
+    parent = fields.StringField()
+    permissions = fields.IntField()
     version = fields.IntField(default=1)
     date = fields.DateTimeField(default=datetime.now)
     body = fields.FileField()
