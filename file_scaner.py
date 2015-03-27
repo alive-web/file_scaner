@@ -1,17 +1,49 @@
 import argparse
-import asyncore
 import pyinotify
+import sys, os
+import hashlib
 from tree import build_tree
 from db import DataBase
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument('-start', dest='option', action='store_true')
+parser.add_argument('-stop', dest='option', action='store_false')
+parser.set_defaults(option="no")
 parser.add_argument('-p', '--path',  type=str, required=True, help='path to scan directory')
 args = parser.parse_args()
 watched_dir = args.path
+demon_start = True
+pid_path = "/tmp/%s.pid" % (hashlib.md5(watched_dir).hexdigest())
+if args.option == "no":
+        demon_start = False
 wm = pyinotify.WatchManager()
 database = DataBase()
 tree = build_tree(watched_dir)
+
+
+def demon(option):
+    if option and os.path.exists(pid_path):
+        with open(pid_path) as this_file:
+            pid = int(this_file.read())
+        os.remove(pid_path)
+        try:
+            os.kill(pid, 9)
+        except OSError:
+            pass
+    if not option:
+        if os.path.exists(pid_path):
+            with open(pid_path) as this_file:
+                pid = int(this_file.read())
+            os.remove(pid_path)
+            try:
+                os.kill(pid, 9)
+                sys.exit("demon was killed")
+            except OSError:
+                sys.exit("demon was not started")
+        else:
+            sys.exit("demon was not started")
+demon(args.option)
 if tree:
     for document in tree:
         database.create_new(document["pathname"], document["is_dir"], watched_dir)
@@ -48,14 +80,11 @@ class EventHandler(pyinotify.ProcessEvent):
             self.db.move(event.pathname, watched_dir)
             self.db.write_log(event)
 
-
-    # def process_default(self, event):
-    #     print event
-    #     self.db.write_log(event)
-    #     # self.db.put_file_revision(event)
-
-
-pyinotify.AsyncNotifier(wm, EventHandler(database))
+notifier = pyinotify.Notifier(wm, EventHandler(database))
 wm.add_watch(watched_dir, mask, rec=True, auto_add=True)
 
-asyncore.loop()
+
+try:
+    notifier.loop(daemonize=demon_start, pid_file=pid_path)
+except pyinotify.NotifierError, err:
+    print >> sys.stderr, err
