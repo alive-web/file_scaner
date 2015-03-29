@@ -6,13 +6,6 @@ from mongoengine import connect
 from models import Events, FileSystem
 
 
-def write_fields(document, previous_version):
-    previous_version.update(set__has_next=True)
-    document.version = previous_version.version + 1
-    document.previous_version = previous_version
-    document.save()
-
-
 class DataBase():
     def __init__(self):
         connect(
@@ -41,10 +34,10 @@ class DataBase():
                     document.body.put(this_file)
                 document.hash_sum = md5_sum
                 document.permissions = st.st_mode
-                write_fields(document, previous_version)
+                document.write_fields(previous_version)
             if previous_version.permissions != st.st_mode:
                 document.permissions = st.st_mode
-                write_fields(document, previous_version)
+                document.write_fields(previous_version)
 
     def create_new(self, pathname, is_dir, watched_dir):
         if not FileSystem.objects(path_name=pathname):
@@ -65,7 +58,7 @@ class DataBase():
     def delete_file(self, pathname):
         previous_version = FileSystem.objects(path_name=pathname).order_by("-version").first()
         document = FileSystem(path_name=pathname, is_del=True)
-        write_fields(document, previous_version)
+        document.write_fields(previous_version)
 
     def move(self, pathname, watched_dir, src_pathname=None):
         document = FileSystem(path_name=pathname)

@@ -15,6 +15,12 @@ class FileSystem(Document):
     is_dir = fields.BooleanField(default=False)
     is_del = fields.BooleanField(default=False)
 
+    def write_fields(self, previous_version):
+        previous_version.update(set__has_next=True)
+        self.version = previous_version.version + 1
+        self.previous_version = previous_version
+        self.save()
+
     def __str__(self):
         return '[%d] %s' % (self.version, self.path_name)
 
