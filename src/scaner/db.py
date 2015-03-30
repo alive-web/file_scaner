@@ -25,7 +25,7 @@ class DataBase():
     def put_file_revision(self, pathname):
         if os.path.exists(pathname):
             st = os.stat(pathname)
-            previous_version = FileSystem.objects(path_name=pathname).order_by("-version").first()
+            previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
             with open(pathname, 'rb') as this_file:
                 md5_sum = hashlib.md5(this_file.read()).hexdigest()
             document = FileSystem(path_name=pathname)
@@ -36,6 +36,7 @@ class DataBase():
                 document.permissions = st.st_mode
                 document.write_fields(previous_version)
             if previous_version.permissions != st.st_mode:
+                document.hash_sum = md5_sum
                 document.permissions = st.st_mode
                 document.write_fields(previous_version)
 
@@ -45,7 +46,7 @@ class DataBase():
             document.permissions = os.stat(pathname).st_mode
             path_parent = os.path.split(pathname)[0]
             if path_parent != watched_dir:
-                parent = FileSystem.objects(path_name=path_parent).order_by("-version").first()
+                parent = FileSystem.objects(path_name=path_parent, has_next=False).first()
                 document.parent = parent
             document.date = datetime.fromtimestamp(os.path.getmtime(pathname))
             if not is_dir and os.path.exists(pathname):
@@ -56,8 +57,8 @@ class DataBase():
             document.save()
 
     def delete_file(self, pathname):
-        previous_version = FileSystem.objects(path_name=pathname).order_by("-version").first()
-        document = FileSystem(path_name=pathname, is_del=True)
+        previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
+        document = FileSystem(path_name=pathname, is_del=True, has_next=True)
         document.write_fields(previous_version)
 
     def move(self, pathname, watched_dir, src_pathname=None):
@@ -65,17 +66,21 @@ class DataBase():
         path_parent = os.path.split(pathname)[0]
         document.permissions = os.stat(pathname).st_mode
         if watched_dir != path_parent:
-            document.parent = FileSystem.objects(path_name=path_parent).order_by("-version").first()
-        if src_pathname:
-            previous_version = FileSystem.objects(path_name=src_pathname).order_by("-version").first()
-            previous_version.update(set__has_next=True)
-            document.version = previous_version.version + 1
-            document.previous_version = previous_version
-        check = FileSystem.objects(path_name=pathname).order_by("-version").first()
-        if check:
-            check.has_next = True
-            check.save()
-        document.save()
+            document.parent = FileSystem.objects(path_name=path_parent, has_next=False).first()
+        previous_version_in_this_dir = FileSystem.objects(path_name=pathname, has_next=False).first()
+        if previous_version_in_this_dir:
+            if not previous_version_in_this_dir.has_next:
+                if src_pathname:
+                    src_file = FileSystem.objects(path_name=src_pathname, has_next=False).first()
+                    src_file.has_next = True
+                    src_file.save()
+        elif src_pathname:
+            previous_version = FileSystem.objects(path_name=src_pathname, has_next=False).first()
+            document.hash_sum = previous_version.hash_sum
+            document.permissions = previous_version.permissions
+            document.write_fields(previous_version)
+        else:
+            self.create_new(pathname, os.path.isdir(pathname), watched_dir)
 
     def get_tree(self, directory):
         path_to_file = FileSystem.objects(path_name__startswith=directory, has_next=False)

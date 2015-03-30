@@ -16,4 +16,3 @@ def build_tree(watched_dir):
                 os.path.getmtime(pathname))}
             tree.append(object1)
     return tree
-

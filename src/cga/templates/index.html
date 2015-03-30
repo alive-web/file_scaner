@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <ul ng-repeat="n in {{ documents }}">
+            <li>{{ n.path_name }}</li>
+    </ul>
+{% endblock %}
