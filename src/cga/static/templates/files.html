@@ -1,6 +1,21 @@
-<ul>
-    <li ng-repeat="file in files">
-        <h4>{{ file.path_name }}</h4>
-        <span>{{ file.date }}</span>
-    </li>
-</ul>
+<div class="container">
+    <div class="col-md-6">
+        <div class="list-group">
+            <a ng-repeat="file in files" ng-class="tog == '{{ file.path_name }}' ? 'list-group-item active' : 'list-group-item'"  ng-click="get_all_versions()">
+                <h4>{{ file.path_name }}</h4>
+                <span>{{ file.date }}</span>
+            </a>
+
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <ul>
+            <li ng-repeat="version in versions" >
+                <h4 ng-click="get_all_versions()">{{ version.path_name }}</h4>
+                <span>{{ version.date }}</span>
+            </li>
+        </ul>
+
+    </div>
+</div>

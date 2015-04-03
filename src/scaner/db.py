@@ -83,7 +83,7 @@ class DataBase():
             self.create_new(pathname, os.path.isdir(pathname), watched_dir)
 
     def get_tree(self, directory):
-        path_to_file = FileSystem.objects(path_name__startswith=directory, has_next=False)
+        path_to_file = FileSystem.objects(path_name__startswith=directory, has_next=False)[8]
         return path_to_file
 
 a = DataBase()

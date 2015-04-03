@@ -5,7 +5,7 @@
                 <span class="input-group-addon">
                     From
                 </span>
-                <input type="date" ng-model="event.from" class="form-control" />
+                <input type="date" ng-change="get_events()" ng-model="date_event_from" class="form-control" />
             </div>
         </div>
     </div>
@@ -15,16 +15,16 @@
                 <span class="input-group-addon">
                     To
                 </span>
-                <input type="date" ng-model="event.to" class="form-control" />
+                <input type="date" ng-change="get_events()" ng-model="date_event_to" class="form-control" />
             </div>
         </div>
     </div>
-    <button type="button" ng-click="get_events()" class="btn btn-default">Get</button>
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-addon1">Filter by event</span>
+        <input ng-model="event.event" ng-change="get_events()" type="text" class="form-control" aria-describedby="basic-addon1">
+    </div>
 </div>
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">Filter by event</span>
-  <input ng-model="event.event" type="text" class="form-control" aria-describedby="basic-addon1">
-</div>
+
 <ul>
     <li ng-repeat="file in files | filter:event">
         <h4>{{ file.path_name }}</h4>

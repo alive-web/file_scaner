@@ -2,6 +2,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from scaner.models import FileSystem, Events
+from datetime import datetime
 
 
 def send_files(documents):
@@ -10,6 +11,7 @@ def send_files(documents):
         data = {
             'path_name': document.path_name,
             'date': str(document.date),
+            'id': str(document.id)
         }
         if hasattr(document, "is_dir"):
             data["is_dir"] = document.is_dir
@@ -24,12 +26,22 @@ def index(request):
 
 
 def get_files(request):
-    documents = FileSystem.objects(path_name__startswith="/home/", has_next=False)
+    documents = []
+    if request.body:
+        document_from_ui = json.loads(request.body)
+        document = FileSystem.objects(id=document_from_ui["id"]).first()
+        documents = [document]
+        while document.previous_version:
+            document = document.previous_version
+            documents.append(document)
+    else:
+        documents = FileSystem.objects(path_name__startswith="/home/", has_next=False)
     return send_files(documents)
 
 
 def api_logs(request):
-    logs = Events.objects()
-    if request.body:
-        data1 = json.loads(request.body)
+    date_event = json.loads(request.body)
+    date_from = datetime.strptime(date_event['from'][:18], "%Y-%m-%dT%H:%M:%S")
+    date_to = datetime.strptime(date_event['to'][:18], "%Y-%m-%dT%H:%M:%S")
+    logs = Events.objects.filter(date__lte=date_to, date__gte=date_from)
     return send_files(logs)

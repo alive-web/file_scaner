@@ -77,7 +77,7 @@ mongoengine.connect(config.DB_NAME, host=_MONGODB_DATABASE_HOST)
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Etc/GMT+0'
 
 USE_I18N = True
 
