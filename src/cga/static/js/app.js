@@ -1,23 +1,30 @@
-/**
- * Created by plevytskyi on 31.03.15.
- */
-var phonecatApp = angular.module('phonecatApp', [
-  'ngRoute',
-  'phonecatControllers'
+var app = angular.module("app", [
+    "ui.router",
+    "ngCookies",
+    "maineControllers"
 ]);
 
-phonecatApp.config(['$routeProvider',
-  function($routeProvider) {
-    $routeProvider.
-      when('/phones', {
-        templateUrl: 'partials/phone-list.html',
-        controller: 'PhoneListCtrl'
-      }).
-      when('/phones/:phoneId', {
-        templateUrl: 'partials/phone-detail.html',
-        controller: 'PhoneDetailCtrl'
-      }).
-      otherwise({
-        redirectTo: '/phones'
-      });
-  }]);
+app.config(['$stateProvider', '$urlRouterProvider',  function ($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise("/files");
+    $stateProvider
+        .state('maine', {
+            url: "/",
+            templateUrl: "static/templates/index.html"
+        })
+        .state('maine.file_system', {
+            url: "files",
+            templateUrl: "static/templates/files.html",
+            controller: "fileController"
+        })
+        .state('maine.logs', {
+            url: "logs",
+            templateUrl: "static/templates/logs.html",
+            controller: "logController"
+        });
+        //.state('maine.file_system.versions', {
+        //    url: "/versions/:path",
+        //    templateUrl: "static/templates/versions.html",
+        //    controller: "versionController"
+        //});
+}]);
+

@@ -12,7 +12,7 @@
     <div class="col-md-6">
         <ul>
             <li ng-repeat="version in versions" >
-                <h4 ng-click="get_all_versions()">{{ version.path_name }}</h4>
+                <h4>[{{ version.version }}]{{ version.path_name }}</h4>
                 <span>{{ version.date }}</span>
             </li>
         </ul>

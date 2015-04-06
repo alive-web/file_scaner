@@ -17,6 +17,8 @@ def send_files(documents):
             data["is_dir"] = document.is_dir
         if hasattr(document, "event"):
             data["event"] = document.event
+        if hasattr(document, "version"):
+            data["version"] = document.version
         files.append(data)
     return HttpResponse(json.dumps(files), content_type="application/json")
 
