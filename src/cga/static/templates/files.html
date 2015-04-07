@@ -1,12 +1,33 @@
+<script type="text/ng-template"  id="tree_item_renderer.html">
+    <li ng-repeat="file in file.child">
+        <div ng-click="get_all_versions()">
+            <h4 >
+                <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-close'"
+                        ng-click="add(file)"></snap>
+                {{ file.path_name }}
+            </h4>
+            <span>{{ file.date }}</span>
+        </div>
+        <ul ng-include="'tree_item_renderer.html'" class="nav nav-list tree"></ul>
+    </li>
+</script>
+
 <div class="container">
     <div class="col-md-6">
-        <div class="list-group">
-            <a ng-repeat="file in files" ng-class="tog == '{{ file.path_name }}' ? 'list-group-item active' : 'list-group-item'"  ng-click="get_all_versions()">
-                <h4>{{ file.path_name }}</h4>
-                <span>{{ file.date }}</span>
-            </a>
+        <ul  class="nav nav-list tree">
+            <li ng-repeat="file in tree">
+                <div ng-click="get_all_versions()">
+                    <h4>
+                        <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-close'"
+                              ng-click="add(file)"></snap>
+                        {{ file.path_name }}
+                    </h4>
+                    <span>{{ file.date }}</span>
+                </div>
+                <ul ng-include="'tree_item_renderer.html'" class="nav nav-list tree"></ul>
+            </li>
 
-        </div>
+        </ul>
     </div>
 
     <div class="col-md-6">

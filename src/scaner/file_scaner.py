@@ -19,7 +19,7 @@ class EventHandler(pyinotify.ProcessEvent):
         self.db.write_log(event)
 
     def process_IN_CREATE(self, event):
-        self.db.create_new(event.pathname, event.dir, watched_dir)
+        self.db.create_new(event.pathname, watched_dir)
         self.db.write_log(event)
 
     def process_IN_CLOSE_WRITE(self, event):
@@ -76,7 +76,7 @@ tree = build_tree(watched_dir)
 
 if tree:
     for document in tree:
-        database.create_new(document["pathname"], document["is_dir"], watched_dir)
+        database.create_new(document["pathname"], watched_dir)
 mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_ATTRIB \
        | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_MOVED_TO | pyinotify.IN_MOVED_FROM
 

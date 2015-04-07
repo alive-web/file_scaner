@@ -22,7 +22,7 @@ class FileSystem(Document):
         self.save()
 
     def __str__(self):
-        return '[%d] %s' % (self.version, self.path_name)
+        return '%s' % self.path_name
 
 
 class Events(Document):

@@ -19,6 +19,8 @@ def send_files(documents):
             data["event"] = document.event
         if hasattr(document, "version"):
             data["version"] = document.version
+        if hasattr(document, "parent"):
+            data["parent"] = str(document.parent)
         files.append(data)
     return HttpResponse(json.dumps(files), content_type="application/json")
 

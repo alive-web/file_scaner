@@ -61,16 +61,20 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': '',
-        'NAME': "",
+        # 'ENGINE': 'django_mongodb_engine',
+        # 'NAME': config.DB_NAME,
     }
 }
 
-_MONGODB_DATABASE_HOST = \
-    'mongodb://%s:%s@%s/%s' \
-    % (config.DB_NAME, config.DB_PASSWORD, config.DB_HOST, config.DB_NAME)
+# _MONGODB_DATABASE_HOST = \
+#     'mongodb://%s:%s@%s/%s' \
+#     % (config.DB_NAME, config.DB_PASSWORD, config.DB_HOST, config.DB_NAME)
 
-mongoengine.connect(config.DB_NAME, host=_MONGODB_DATABASE_HOST)
+mongoengine.connect(config.DB_NAME,
+            host=config.DB_HOST,
+            port=config.DB_PORT,
+            username=config.DB_USERNAME,
+            password=config.DB_PASSWORD)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
