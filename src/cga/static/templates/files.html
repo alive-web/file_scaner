@@ -1,35 +1,20 @@
-<script type="text/ng-template"  id="tree_item_renderer.html">
-    <li ng-repeat="file in file.child">
-        <div ng-click="get_all_versions()">
-            <h4 >
-                <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-close'"
-                        ng-click="add(file)"></snap>
-                {{ file.path_name }}
-            </h4>
-            <span>{{ file.date }}</span>
-        </div>
-        <ul ng-include="'tree_item_renderer.html'" class="nav nav-list tree"></ul>
-    </li>
-</script>
-
 <div class="container">
     <div class="col-md-6">
         <ul  class="nav nav-list tree">
             <li ng-repeat="file in tree">
-                <div ng-click="get_all_versions()">
                     <h4>
-                        <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-close'"
+                        <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-open'"
                               ng-click="add(file)"></snap>
-                        {{ file.path_name }}
+                        <span ng-click="get_all_versions()">
+                            {{ file.path_name }}<br/>
+                            {{ file.date }}
+                        </span>
                     </h4>
-                    <span>{{ file.date }}</span>
-                </div>
-                <ul ng-include="'tree_item_renderer.html'" class="nav nav-list tree"></ul>
+                <ul ng-include="'static/templates/tree_item_renderer.html'" class="nav nav-list tree"></ul>
             </li>
 
         </ul>
     </div>
-
     <div class="col-md-6">
         <ul>
             <li ng-repeat="version in versions" >
@@ -37,6 +22,5 @@
                 <span>{{ version.date }}</span>
             </li>
         </ul>
-
     </div>
 </div>

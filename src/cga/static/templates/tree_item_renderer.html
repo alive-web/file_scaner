@@ -1,0 +1,11 @@
+<li ng-repeat="file in file.child">
+        <h4>
+            <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-open'"
+                  ng-click="add(file)"></snap>
+            <span ng-click="get_all_versions()">
+                {{ file.path_name }}<br/>
+                {{ file.date }}
+            </span>
+        </h4>
+    <ul ng-include="'static/templates/tree_item_renderer.html'" class="nav nav-list tree"></ul>
+</li>

@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from scaner.models import FileSystem, Events
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def send_files(documents):
@@ -30,7 +30,6 @@ def index(request):
 
 
 def get_files(request):
-    documents = []
     if request.body:
         document_from_ui = json.loads(request.body)
         document = FileSystem.objects(id=document_from_ui["id"]).first()
@@ -47,5 +46,6 @@ def api_logs(request):
     date_event = json.loads(request.body)
     date_from = datetime.strptime(date_event['from'][:18], "%Y-%m-%dT%H:%M:%S")
     date_to = datetime.strptime(date_event['to'][:18], "%Y-%m-%dT%H:%M:%S")
+    date_to += timedelta(days=1)
     logs = Events.objects.filter(date__lte=date_to, date__gte=date_from)
     return send_files(logs)
