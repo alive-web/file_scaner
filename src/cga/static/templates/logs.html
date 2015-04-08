@@ -1,34 +1,37 @@
 <div class="container">
-    <div class='col-md-4'>
-        <div class="form-group">
-            <div class='input-group date'>
-                <span class="input-group-addon">
-                    From
-                </span>
-                <input type="date" ng-change="get_events()" ng-model="date_event_from" class="form-control" />
+    <div class="raw">
+        <div class='col-md-4'>
+            <div class="form-group">
+                <div class='input-group date'>
+                    <span class="input-group-addon">
+                        From
+                    </span>
+                    <input type="date" ng-change="get_events()" ng-model="date_event_from" class="form-control" />
+                </div>
             </div>
         </div>
-    </div>
-    <div class='col-md-4' >
-        <div class="form-group">
-            <div class='input-group date'>
-                <span class="input-group-addon">
-                    To
-                </span>
-                <input type="date" ng-change="get_events()" ng-model="date_event_to" class="form-control" />
+        <div class='col-md-4' >
+            <div class="form-group">
+                <div class='input-group date'>
+                    <span class="input-group-addon">
+                        To
+                    </span>
+                    <input type="date" ng-change="get_events()" ng-model="date_event_to" class="form-control" />
+                </div>
             </div>
         </div>
+        <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Filter by event</span>
+            <input ng-model="event.event" ng-change="get_events()" type="text" class="form-control" aria-describedby="basic-addon1">
+        </div>
     </div>
-    <div class="input-group">
-        <span class="input-group-addon" id="basic-addon1">Filter by event</span>
-        <input ng-model="event.event" ng-change="get_events()" type="text" class="form-control" aria-describedby="basic-addon1">
+    <div class="raw">
+        <ul id="logs">
+            <li ng-repeat="file in files | filter:event">
+                <h4>{{file.path_name}}</h4>
+                <span>{{file.event}}</span> <br/>
+                <span>{{file.date}}</span>
+            </li>
+        </ul>
     </div>
 </div>
-
-<ul>
-    <li ng-repeat="file in files | filter:event">
-        <h4>{{ file.path_name }}</h4>
-        <span>{{ file.event }}</span> <br/>
-        <span>{{ file.date }}</span>
-    </li>
-</ul>

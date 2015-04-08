@@ -1,4 +1,6 @@
+import os
 import json
+import shutil
 from django.shortcuts import render
 from django.http import HttpResponse
 from scaner.models import FileSystem, Events
@@ -49,3 +51,30 @@ def api_logs(request):
     date_to += timedelta(days=1)
     logs = Events.objects.filter(date__lte=date_to, date__gte=date_from)
     return send_files(logs)
+
+
+def downgrade(request):
+    data_file = json.loads(request.body)
+    last_file = FileSystem.objects(id=data_file['last_id']).first()
+    need_file = FileSystem.objects(id=data_file['this_id']).first()
+    if last_file.hash_sum != need_file.hash_sum:
+        work_copy = need_file
+        while not work_copy.body:
+            work_copy = work_copy.previous_version
+        with open(last_file.path_name, 'w') as this_file:
+            this_file.write(work_copy.body.read())
+
+    if last_file.permissions != need_file.permissions:
+        os.chmod(last_file.path_name, int(str(need_file.permissions), 8))
+    if last_file.path_name != need_file.path_name:
+        shutil.move(last_file.path_name, need_file.path_name)
+
+
+    return HttpResponse()
+    # document = last_file
+    # if need_file.path_name != last_file.path_name:
+    #     shutil.move(last_file.path_name, need_file.path_name)
+    #     while document.version != need_file.version:
+    #         document = last_file.previous_version
+    #         last_file.delete()
+    #         last_file = document

@@ -1,4 +1,5 @@
 import os
+import stat
 import config
 import hashlib
 from datetime import datetime
@@ -24,7 +25,6 @@ class DataBase():
 
     def put_file_revision(self, pathname):
         if os.path.exists(pathname):
-            st = os.stat(pathname)
             previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
             with open(pathname, 'rb') as this_file:
                 md5_sum = hashlib.md5(this_file.read()).hexdigest()
@@ -33,17 +33,17 @@ class DataBase():
                 with open(pathname, 'rb') as this_file:
                     document.body.put(this_file)
                 document.hash_sum = md5_sum
-                document.permissions = st.st_mode
+                document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
                 document.write_fields(previous_version)
-            if previous_version.permissions != st.st_mode:
+            if previous_version.permissions != oct(stat.S_IMODE(os.lstat(pathname).st_mode)):
                 document.hash_sum = md5_sum
-                document.permissions = st.st_mode
+                document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
                 document.write_fields(previous_version)
 
     def create_new(self, pathname, watched_dir):
         if not FileSystem.objects(path_name=pathname):
             document = FileSystem(path_name=pathname, is_dir=os.path.isdir(pathname))
-            document.permissions = os.stat(pathname).st_mode
+            document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
             path_parent = os.path.split(pathname)[0]
             if path_parent != watched_dir:
                 parent = FileSystem.objects(path_name=path_parent, has_next=False).first()
@@ -64,7 +64,7 @@ class DataBase():
     def move(self, pathname, watched_dir, src_pathname=None):
         document = FileSystem(path_name=pathname, is_dir=os.path.isdir(pathname))
         path_parent = os.path.split(pathname)[0]
-        document.permissions = os.stat(pathname).st_mode
+        document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
         if watched_dir != path_parent:
             document.parent = FileSystem.objects(path_name=path_parent, has_next=False).first()
         previous_version_in_this_dir = FileSystem.objects(path_name=pathname, has_next=False).first()
@@ -80,6 +80,6 @@ class DataBase():
             document.permissions = previous_version.permissions
             document.write_fields(previous_version)
         else:
-            self.create_new(pathname, os.path.isdir(pathname), watched_dir)
+            self.create_new(pathname, watched_dir)
 
 

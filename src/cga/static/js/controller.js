@@ -5,7 +5,12 @@ maineControllers.controller('fileController', function ($scope, $http, $cookies)
     $scope.get_all_versions = function(){
         $scope.tog = this.file.path_name;
         $http.post('http://127.0.0.1:8000/api/files/', {"id": this.file.id}).success(function(data) {
-        $scope.versions = data;
+            $scope.versions = data;
+        });
+    };
+    $scope.downgrade = function(){
+        $http.post('downgrade/', {"this_id": this.version.id, "last_id": $scope.versions[0].id}).success(function(data) {
+            console.log("changes in file:" + data + ". Downgrade I'll do later");
         });
     };
     $scope.add = function(file){
@@ -34,9 +39,7 @@ maineControllers.controller('fileController', function ($scope, $http, $cookies)
                 j++;
             }
         }
-
     });
-
 });
 
 maineControllers.controller('logController', function ($scope, $http, $cookies, $filter) {

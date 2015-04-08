@@ -19,7 +19,13 @@
         <ul>
             <li ng-repeat="version in versions" >
                 <h4>[{{ version.version }}]{{ version.path_name }}</h4>
-                <span>{{ version.date }}</span>
+                <span>
+                    {{ version.date }}
+                    <button class="btn-xs" ng-click="downgrade()"
+                            ng-hide="{{ versions[0].version == version.version }}">
+                        back
+                    </button>
+                </span>
             </li>
         </ul>
     </div>
