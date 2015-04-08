@@ -4,7 +4,7 @@ maineControllers.controller('fileController', function ($scope, $http, $cookies)
     $http.defaults.headers.post['X-CSRFToken'] = $cookies['csrftoken'];
     $scope.get_all_versions = function(){
         $scope.tog = this.file.path_name;
-        $http.post('http://127.0.0.1:8000/api/files/', {"id": this.file.id}).success(function(data) {
+        $http.post('api/files/', {"id": this.file.id}).success(function(data) {
             $scope.versions = data;
         });
     };
@@ -28,7 +28,7 @@ maineControllers.controller('fileController', function ($scope, $http, $cookies)
             }
         }
     };
-    $http.post('http://127.0.0.1:8000/api/files/').success(function(data) {
+    $http.post('api/files/').success(function(data) {
         $scope.all_files = data;
         var j = 0;
         $scope.tree = [];
@@ -48,7 +48,7 @@ maineControllers.controller('logController', function ($scope, $http, $cookies, 
     $scope.date_event_from = new Date($filter("date")(date.setDate(date.getDate() - 1), 'yyyy, MM, dd'));
     $http.defaults.headers.post['X-CSRFToken'] = $cookies['csrftoken'];
     $scope.get_events = function(){
-        $http.post('http://127.0.0.1:8000/api/logs/', {'from':$scope.date_event_from,
+        $http.post('api/logs/', {'from':$scope.date_event_from,
             'to':$scope.date_event_to}).success(function(data){$scope.files = data;});
     };
     $scope.get_events()
