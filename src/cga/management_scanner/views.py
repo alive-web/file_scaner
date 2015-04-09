@@ -7,6 +7,10 @@ from scaner.models import FileSystem, Events
 from datetime import datetime, timedelta
 
 
+def index(request):
+    return render(request, 'base.html')
+
+
 def send_files(documents):
     files = []
     for document in documents:
@@ -27,18 +31,28 @@ def send_files(documents):
     return HttpResponse(json.dumps(files), content_type="application/json")
 
 
-def index(request):
-    return render(request, 'base.html')
+def all_previous_version(document):
+    documents = [document]
+    while document.previous_version:
+        document = document.previous_version
+        documents.append(document)
+    return documents
+
+
+def all_next_versions(document):
+    documents = []
+    if hasattr(document, "has_next"):
+        while document.has_next:
+            document = FileSystem.objects(previous_version=document.id).first()
+            documents.append(document)
+    return documents
 
 
 def get_files(request):
     if request.body:
         document_from_ui = json.loads(request.body)
         document = FileSystem.objects(id=document_from_ui["id"]).first()
-        documents = [document]
-        while document.previous_version:
-            document = document.previous_version
-            documents.append(document)
+        documents = all_previous_version(document)
     else:
         documents = FileSystem.objects(path_name__startswith="/home/", has_next=False)
     return send_files(documents)
@@ -55,26 +69,21 @@ def api_logs(request):
 
 def downgrade(request):
     data_file = json.loads(request.body)
-    last_file = FileSystem.objects(id=data_file['last_id']).first()
     need_file = FileSystem.objects(id=data_file['this_id']).first()
-    if last_file.hash_sum != need_file.hash_sum:
-        work_copy = need_file
-        while not work_copy.body:
-            work_copy = work_copy.previous_version
-        with open(last_file.path_name, 'w') as this_file:
-            this_file.write(work_copy.body.read())
-
-    if last_file.permissions != need_file.permissions:
-        os.chmod(last_file.path_name, int(str(need_file.permissions), 8))
-    if last_file.path_name != need_file.path_name:
-        shutil.move(last_file.path_name, need_file.path_name)
-
-
+    key_for_versions = need_file.key_for_all_versions
+    last_file = FileSystem.objects(key_for_all_versions=key_for_versions).order_by("-version").first()
+    if need_file:
+        if need_file.permissions != last_file.permissions:
+            os.chmod(last_file.path_name, int(str(need_file.permissions), 8))
+        if need_file.hash_sum != last_file.hash_sum:
+            while not need_file.body:
+                need_file = need_file.previous_version
+            with open(last_file.path_name, 'w') as this_file:
+                this_file.write(need_file.body.read())
+        if need_file.path_name != last_file.path_name:
+            shutil.move(last_file.path_name, need_file.path_name)
+        documents1 = all_next_versions(FileSystem.objects(id=last_file.id).first())
+        documents2 = all_previous_version(last_file)
+        documents = documents1 + documents2
+        return send_files(documents)
     return HttpResponse()
-    # document = last_file
-    # if need_file.path_name != last_file.path_name:
-    #     shutil.move(last_file.path_name, need_file.path_name)
-    #     while document.version != need_file.version:
-    #         document = last_file.previous_version
-    #         last_file.delete()
-    #         last_file = document

@@ -17,12 +17,11 @@
     </div>
     <div class="col-md-6">
         <ul>
-            <li ng-repeat="version in versions" >
+            <li ng-repeat="version in versions | orderBy:'-version'" >
                 <h4>[{{ version.version }}]{{ version.path_name }}</h4>
                 <span>
                     {{ version.date }}
-                    <button class="btn-xs" ng-click="downgrade()"
-                            ng-hide="{{ versions[0].version == version.version }}">
+                    <button class="btn-xs" ng-click="downgrade()">
                         back
                     </button>
                 </span>

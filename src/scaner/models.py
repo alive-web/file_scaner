@@ -14,11 +14,14 @@ class FileSystem(Document):
     body = fields.FileField()
     is_dir = fields.BooleanField(default=False)
     is_del = fields.BooleanField(default=False)
+    key_for_all_versions = fields.StringField(max_length=36)
 
     def write_fields(self, previous_version):
         previous_version.update(set__has_next=True)
+        self.parent = previous_version.parent
         self.version = previous_version.version + 1
         self.previous_version = previous_version
+        self.key_for_all_versions = previous_version.key_for_all_versions
         self.save()
 
     def __str__(self):

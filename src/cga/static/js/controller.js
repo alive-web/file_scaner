@@ -3,14 +3,18 @@ maineControllers = angular.module('maineControllers', []);
 maineControllers.controller('fileController', function ($scope, $http, $cookies) {
     $http.defaults.headers.post['X-CSRFToken'] = $cookies['csrftoken'];
     $scope.get_all_versions = function(){
-        $scope.tog = this.file.path_name;
         $http.post('api/files/', {"id": this.file.id}).success(function(data) {
             $scope.versions = data;
         });
     };
     $scope.downgrade = function(){
-        $http.post('downgrade/', {"this_id": this.version.id, "last_id": $scope.versions[0].id}).success(function(data) {
-            console.log("changes in file:" + data + ". Downgrade I'll do later");
+        console.log($scope.versions);
+        $http.post('downgrade/', {"this_id": this.version.id}).success(function(data) {
+            if (data){
+                $scope.versions=data;
+            };
+            console.log($scope.versions);
+            console.log(data);
         });
     };
     $scope.add = function(file){

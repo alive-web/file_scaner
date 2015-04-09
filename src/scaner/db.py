@@ -1,5 +1,6 @@
 import os
 import stat
+import uuid
 import config
 import hashlib
 from datetime import datetime
@@ -35,7 +36,7 @@ class DataBase():
                 document.hash_sum = md5_sum
                 document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
                 document.write_fields(previous_version)
-            if previous_version.permissions != oct(stat.S_IMODE(os.lstat(pathname).st_mode)):
+            if previous_version.permissions != int(oct(stat.S_IMODE(os.lstat(pathname).st_mode))):
                 document.hash_sum = md5_sum
                 document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
                 document.write_fields(previous_version)
@@ -54,6 +55,7 @@ class DataBase():
                     document.body.put(this_file)
                     md5_sum = hashlib.md5(this_file.read()).hexdigest()
                 document.hash_sum = md5_sum
+            document.key_for_all_versions = str(uuid.uuid4())
             document.save()
 
     def delete_file(self, pathname):
@@ -81,5 +83,4 @@ class DataBase():
             document.write_fields(previous_version)
         else:
             self.create_new(pathname, watched_dir)
-
 
