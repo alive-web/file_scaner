@@ -39,13 +39,10 @@ def all_previous_version(document):
     return documents
 
 
-def all_next_versions(document):
-    documents = []
-    if hasattr(document, "has_next"):
-        while document.has_next:
-            document = FileSystem.objects(previous_version=document.id).first()
-            documents.append(document)
-    return documents
+def del_all_next_versions(need_file, last_file):
+    while last_file.version > need_file.version:
+        last_file.delete()
+        last_file = FileSystem.objects(key_for_all_versions=need_file.key_for_all_versions).order_by("-version").first()
 
 
 def get_files(request):
@@ -72,18 +69,21 @@ def downgrade(request):
     need_file = FileSystem.objects(id=data_file['this_id']).first()
     key_for_versions = need_file.key_for_all_versions
     last_file = FileSystem.objects(key_for_all_versions=key_for_versions).order_by("-version").first()
+    last_file.disabled = True
+    last_file.save()
     if need_file:
-        if need_file.permissions != last_file.permissions:
-            os.chmod(last_file.path_name, int(str(need_file.permissions), 8))
         if need_file.hash_sum != last_file.hash_sum:
             while not need_file.body:
                 need_file = need_file.previous_version
             with open(last_file.path_name, 'w') as this_file:
                 this_file.write(need_file.body.read())
+        if need_file.permissions != last_file.permissions:
+            os.chmod(last_file.path_name, int(str(need_file.permissions), 8))
         if need_file.path_name != last_file.path_name:
             shutil.move(last_file.path_name, need_file.path_name)
-        documents1 = all_next_versions(FileSystem.objects(id=last_file.id).first())
-        documents2 = all_previous_version(last_file)
-        documents = documents1 + documents2
+        del_all_next_versions(need_file, last_file)
+        documents = all_previous_version(need_file)
+        need_file.has_next = False
+        need_file.save()
         return send_files(documents)
     return HttpResponse()

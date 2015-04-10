@@ -15,6 +15,7 @@ class FileSystem(Document):
     is_dir = fields.BooleanField(default=False)
     is_del = fields.BooleanField(default=False)
     key_for_all_versions = fields.StringField(max_length=36)
+    disabled = fields.BooleanField(default=False)
 
     def write_fields(self, previous_version):
         previous_version.update(set__has_next=True)

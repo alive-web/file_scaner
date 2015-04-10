@@ -3,6 +3,7 @@ import stat
 import uuid
 import config
 import hashlib
+from decorator import check_is_disabled
 from datetime import datetime
 from mongoengine import connect
 from models import Events, FileSystem
@@ -19,14 +20,17 @@ class DataBase():
         )
 
     def write_log(self, event):
-        action = Events(event=event.maskname, path_name=event.pathname)
-        this_document = FileSystem.objects(path_name=event.pathname).order_by("-version").first()
-        action.document = this_document
-        action.save()
+            this_document = FileSystem.objects(path_name=event.pathname).order_by("-version").first()
+            if this_document:
+                if not this_document.disabled:
+                    action = Events(event=event.maskname, path_name=event.pathname)
+                    action.document = this_document
+                    action.save()
 
-    def put_file_revision(self, pathname):
+    @check_is_disabled
+    def put_file_revision(self, pathname, previous_version=None):
         if os.path.exists(pathname):
-            previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
+            # previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
             with open(pathname, 'rb') as this_file:
                 md5_sum = hashlib.md5(this_file.read()).hexdigest()
             document = FileSystem(path_name=pathname, is_dir=os.path.isdir(pathname))
@@ -41,8 +45,9 @@ class DataBase():
                 document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
                 document.write_fields(previous_version)
 
-    def create_new(self, pathname, watched_dir):
-        if not FileSystem.objects(path_name=pathname):
+    @check_is_disabled
+    def create_new(self, pathname, watched_dir, *args):
+        if not FileSystem.objects(path_name=pathname) and os.path.exists(pathname):
             document = FileSystem(path_name=pathname, is_dir=os.path.isdir(pathname))
             document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
             path_parent = os.path.split(pathname)[0]
@@ -58,12 +63,14 @@ class DataBase():
             document.key_for_all_versions = str(uuid.uuid4())
             document.save()
 
-    def delete_file(self, pathname):
-        previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
+    @check_is_disabled
+    def delete_file(self, pathname, previous_version=None):
+        # previous_version = FileSystem.objects(path_name=pathname, has_next=False).first()
         document = FileSystem(path_name=pathname, is_del=True, has_next=True, is_dir=os.path.isdir(pathname))
         document.write_fields(previous_version)
 
-    def move(self, pathname, watched_dir, src_pathname=None):
+    @check_is_disabled
+    def move(self, pathname, watched_dir, src_pathname=None, *args):
         document = FileSystem(path_name=pathname, is_dir=os.path.isdir(pathname))
         path_parent = os.path.split(pathname)[0]
         document.permissions = oct(stat.S_IMODE(os.lstat(pathname).st_mode))
@@ -83,4 +90,3 @@ class DataBase():
             document.write_fields(previous_version)
         else:
             self.create_new(pathname, watched_dir)
-
