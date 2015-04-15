@@ -8,13 +8,10 @@ maineControllers.controller('fileController', function ($scope, $http, $cookies)
         });
     };
     $scope.downgrade = function(){
-        console.log($scope.versions);
         $http.post('downgrade/', {"this_id": this.version.id}).success(function(data) {
             if (data){
                 $scope.versions=data;
             };
-            console.log($scope.versions);
-            console.log(data);
         });
     };
     $scope.add = function(file){

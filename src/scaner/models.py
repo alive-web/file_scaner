@@ -16,14 +16,17 @@ class FileSystem(Document):
     is_del = fields.BooleanField(default=False)
     key_for_all_versions = fields.StringField(max_length=36)
     disabled = fields.BooleanField(default=False)
+    hidden = fields.BooleanField(default=False)
 
-    def write_fields(self, previous_version):
-        previous_version.update(set__has_next=True)
-        self.parent = previous_version.parent
-        self.version = previous_version.version + 1
-        self.previous_version = previous_version
-        self.key_for_all_versions = previous_version.key_for_all_versions
-        self.save()
+    def write_fields(self, previous_version, parent_path=None):
+        if previous_version:
+            previous_version.update(set__has_next=True)
+            parent = FileSystem.objects(path_name=parent_path, has_next=False).first()
+            self.parent = parent if parent else previous_version.parent
+            self.version = previous_version.version + 1
+            self.previous_version = previous_version
+            self.key_for_all_versions = previous_version.key_for_all_versions
+            self.save()
 
     def __str__(self):
         return '%s' % self.path_name

@@ -21,10 +21,10 @@ def send_files(documents):
         }
         if hasattr(document, "is_dir"):
             data["is_dir"] = document.is_dir
+            data["version"] = document.version
+            data["hidden"] = document.hidden
         if hasattr(document, "event"):
             data["event"] = document.event
-        if hasattr(document, "version"):
-            data["version"] = document.version
         if hasattr(document, "parent"):
             data["parent"] = str(document.parent)
         files.append(data)
@@ -39,10 +39,10 @@ def all_previous_version(document):
     return documents
 
 
-def del_all_next_versions(need_file, last_file):
-    while last_file.version > need_file.version:
-        last_file.delete()
-        last_file = FileSystem.objects(key_for_all_versions=need_file.key_for_all_versions).order_by("-version").first()
+def del_all_next_versions(need_file):
+    files = FileSystem.objects(key_for_all_versions=need_file.key_for_all_versions, version__gt=need_file.version)
+    for document in files:
+        document.delete()
 
 
 def get_files(request):
@@ -81,7 +81,7 @@ def downgrade(request):
             os.chmod(last_file.path_name, int(str(need_file.permissions), 8))
         if need_file.path_name != last_file.path_name:
             shutil.move(last_file.path_name, need_file.path_name)
-        del_all_next_versions(need_file, last_file)
+        del_all_next_versions(need_file)
         documents = all_previous_version(need_file)
         need_file.has_next = False
         need_file.save()

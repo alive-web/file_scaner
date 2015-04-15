@@ -1,4 +1,4 @@
-<li ng-repeat="file in file.child">
+<li ng-repeat="file in file.child" ng-show="!{{file.hidden}} || hidden">
         <h4>
             <snap ng-class="{{ !file.is_dir }} ? 'glyphicon glyphicon-file' : 'glyphicon glyphicon-folder-open'"
                   ng-click="add(file)"></snap>
